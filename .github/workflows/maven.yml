@@ -1,0 +1,67 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Java CI
+
+on: [push]
+
+jobs:
+
+  integration-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [8, 11, 14]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      - name: Checkout maven-integration-testing
+        uses: actions/checkout@v2
+
+      - name: Checkout maven
+        uses: actions/checkout@v2
+        with:
+          repository: apache/maven
+          path: /tmp/maven/
+          ref: master
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Build Maven
+        shell: bash
+        run: mvn verify -P local-it,versionlessMavenDist -f /tmp/maven/
+
+      - name: Running integration tests
+        shell: bash
+        run: mvn install -e -B -V -Prun-its,embedded -Dmaven.repo.local=/tmp/repo/ -DmavenDistro="/tmp/maven/apache-maven/target/apache-maven-bin.zip" -DwrapperDistroDir="/tmp/maven/apache-maven/target" -DmavenWrapper="/tmp/maven/maven-wrapper/target/maven-wrapper.jar" -f maven-integration-testing/pom.xml
+
+      - name: Upload IT logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: test logs
+          path: core-it-suite/target/test-classes/mng-5175/log.txt
+
+      - name: Upload timing logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: test logs
+          path: core-it-suite/target/time-writer.txt

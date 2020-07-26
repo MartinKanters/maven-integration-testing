@@ -31,7 +31,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
+
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 /**
  * This is a test set for <a href="https://issues.apache.org/jira/browse/MNG-5175">MNG-5175</a>.
@@ -55,6 +61,7 @@ public class MavenITmng5175WagonHttpTest
     protected void setUp()
         throws Exception
     {
+        final Path timeWriterLog = Paths.get( "target/time-writer.txt" );
         Handler handler = new AbstractHandler()
         {
             @Override
@@ -62,6 +69,8 @@ public class MavenITmng5175WagonHttpTest
                                 HttpServletResponse response )
                 throws IOException, ServletException
             {
+                long start = System.currentTimeMillis();
+                StringBuffer message = new StringBuffer( "Start: " ).append( start ).append( "\n" );
                 try
                 {
                     Thread.sleep( 15 );
@@ -70,6 +79,12 @@ public class MavenITmng5175WagonHttpTest
                 {
                     throw new ServletException( e.getMessage() );
                 }
+                long end = System.currentTimeMillis();
+                message.append( "End: " ).append( end ).append( "\n" );
+                message.append( "Total: " ).append( (end - start) ).append( "\n\n" );
+
+                Files.write( timeWriterLog, message.toString().getBytes(), CREATE, APPEND );
+
                 response.setContentType( "text/plain" );
                 response.setStatus( HttpServletResponse.SC_OK );
                 response.getWriter().println( "some content" );
@@ -116,6 +131,8 @@ public class MavenITmng5175WagonHttpTest
         filterProps.setProperty( "@port@", Integer.toString( port ) );
 
         verifier.filterFile( "settings-template.xml", "settings.xml", "UTF-8", filterProps );
+
+        verifier.deleteArtifacts( "org.apache.maven.its.mng5175", "fake-dependency", "1.0-SNAPSHOT" );
 
         verifier.addCliOption( "-U" );
         verifier.addCliOption( "--settings" );
