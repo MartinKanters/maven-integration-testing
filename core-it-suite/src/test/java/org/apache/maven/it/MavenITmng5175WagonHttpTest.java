@@ -51,6 +51,7 @@ public class MavenITmng5175WagonHttpTest
     private Server server;
 
     private int port;
+    private File testDir;
 
     public MavenITmng5175WagonHttpTest()
     {
@@ -103,6 +104,8 @@ public class MavenITmng5175WagonHttpTest
         }
         port = ( (NetworkConnector) server.getConnectors()[0] ).getLocalPort();
         System.out.println( "Bound server socket to the port " + port );
+
+        testDir = ResourceExtractor.simpleExtractResources( getClass(), "/mng-5175" );
     }
 
     @Override
@@ -120,11 +123,68 @@ public class MavenITmng5175WagonHttpTest
      * Test that the read time out from settings is used.
      * basically use a 1ms time out and wait a bit in the handler
      */
-    public void testmng5175_ReadTimeOutFromSettings()
+    public void testmng5175_ReadTimeOutFromSettings1()
         throws Exception
     {
-        File testDir = ResourceExtractor.simpleExtractResources( getClass(), "/mng-5175" );
+        executeTest(1);
+    }
 
+    public void testmng5175_ReadTimeOutFromSettings2()
+            throws Exception
+    {
+        executeTest(2);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings3()
+            throws Exception
+    {
+        executeTest(3);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings4()
+            throws Exception
+    {
+        executeTest(4);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings5()
+            throws Exception
+    {
+        executeTest(5);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings6()
+            throws Exception
+    {
+        executeTest(6);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings7()
+            throws Exception
+    {
+        executeTest(7);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings8()
+            throws Exception
+    {
+        executeTest(8);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings9()
+            throws Exception
+    {
+        executeTest(9);
+    }
+
+    public void testmng5175_ReadTimeOutFromSettings10()
+            throws Exception
+    {
+        executeTest(10);
+    }
+
+    private void executeTest( int i ) throws VerificationException, IOException
+    {
         Verifier verifier = newVerifier( testDir.getAbsolutePath() );
 
         Properties filterProps = new Properties();
@@ -139,6 +199,7 @@ public class MavenITmng5175WagonHttpTest
         verifier.addCliOption( "settings.xml" );
         verifier.addCliOption( "--fail-never" );
         verifier.addCliOption( "--errors" );
+        verifier.setLogFileName( "log" + i + ".txt" );
         verifier.setMavenDebug( true );
         verifier.executeGoal( "validate" );
 
