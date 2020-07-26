@@ -50,11 +50,11 @@ jobs:
 
       - name: Build Maven
         shell: bash
-        run: mvn verify -P local-it,versionlessMavenDist -f maven/pom.xml
+        run: mvn verify -P local-it,versionlessMavenDist -DskipTests -f maven/pom.xml
 
       - name: Running integration tests
         shell: bash
-        run: mkdir local-it-repo && mvn install -e -B -V -Prun-its,embedded -Dmaven.repo.local=local-it-repo/ -DmavenDistro="maven/apache-maven/target/apache-maven-bin.zip" -DwrapperDistroDir="maven/apache-maven/target" -DmavenWrapper="maven/maven-wrapper/target/maven-wrapper.jar" -f maven-integration-testing/pom.xml
+        run: mkdir $GITHUB_WORKSPACE/local-it-repo && mvn install -e -B -V -Prun-its,embedded -Dmaven.repo.local=$GITHUB_WORKSPACE/local-it-repo/ -DmavenDistro="$GITHUB_WORKSPACE/maven/apache-maven/target/apache-maven-bin.zip" -DwrapperDistroDir="$GITHUB_WORKSPACE/maven/apache-maven/target" -DmavenWrapper="$GITHUB_WORKSPACE/maven/maven-wrapper/target/maven-wrapper.jar" -f maven-integration-testing/pom.xml
 
       - name: Upload IT logs
         uses: actions/upload-artifact@v2
