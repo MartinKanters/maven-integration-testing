@@ -33,12 +33,14 @@ jobs:
 
       - name: Checkout maven-integration-testing
         uses: actions/checkout@v2
-
+        with:
+          path: maven-integration-testing/
+          
       - name: Checkout maven
         uses: actions/checkout@v2
         with:
           repository: apache/maven
-          path: /tmp/maven/
+          path: maven/
           ref: master
 
       - name: Set up JDK
@@ -48,20 +50,20 @@ jobs:
 
       - name: Build Maven
         shell: bash
-        run: mvn verify -P local-it,versionlessMavenDist -f /tmp/maven/
+        run: mvn verify -P local-it,versionlessMavenDist -f maven/pom.xml
 
       - name: Running integration tests
         shell: bash
-        run: mvn install -e -B -V -Prun-its,embedded -Dmaven.repo.local=/tmp/repo/ -DmavenDistro="/tmp/maven/apache-maven/target/apache-maven-bin.zip" -DwrapperDistroDir="/tmp/maven/apache-maven/target" -DmavenWrapper="/tmp/maven/maven-wrapper/target/maven-wrapper.jar"
+        run: mkdir local-it-repo && mvn install -e -B -V -Prun-its,embedded -Dmaven.repo.local=local-it-repo/ -DmavenDistro="maven/apache-maven/target/apache-maven-bin.zip" -DwrapperDistroDir="maven/apache-maven/target" -DmavenWrapper="maven/maven-wrapper/target/maven-wrapper.jar" -f maven-integration-testing/pom.xml
 
       - name: Upload IT logs
         uses: actions/upload-artifact@v2
         with:
           name: test logs
-          path: core-it-suite/target/test-classes/mng-5175/log.txt
+          path: maven-integration-testing/core-it-suite/target/test-classes/mng-5175/log.txt
 
       - name: Upload timing logs
         uses: actions/upload-artifact@v2
         with:
           name: test logs
-          path: core-it-suite/target/time-writer.txt
+          path: maven-integration-testing/core-it-suite/target/time-writer.txt
